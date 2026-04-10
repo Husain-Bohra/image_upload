@@ -384,6 +384,7 @@
             progressFill.style.width = '100%';
 
             const { data: urlData } = sb.storage.from(bucket).getPublicUrl(filePath);
+            await sb.from('food-table').insert({ image: urlData.publicUrl });
             showStatus('success', `✅ Uploaded!\n${urlData.publicUrl}`);
             setTimeout(reset, 4000);
         } catch (err) {
