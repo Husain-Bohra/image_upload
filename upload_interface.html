@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Plate Upload</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 12px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .preview-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .preview-image {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .file-info {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .file-name {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .upload-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .cancel-btn {
+            background: #f1f1f1;
+            color: #666;
+        }
+
+        .cancel-btn:hover {
+            background: #e1e1e1;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.uploading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .config-section {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .config-section strong {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .config-section input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍽️ Food Plate Upload</h1>
+        <p class="subtitle">Upload your meal image for calorie analysis</p>
+
+        <!-- Configuration Section -->
+        <div class="config-section">
+            <strong>⚙️ Supabase Configuration</strong>
+            <input type="text" id="supabaseUrl" placeholder="Supabase URL (e.g., https://xxx.supabase.co)">
+            <input type="text" id="supabaseKey" placeholder="Supabase Anon Key">
+            <input type="text" id="bucketName" placeholder="Bucket Name (e.g., food-images)" value="food-images">
+        </div>
+
+        <!-- Upload Area -->
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📸</div>
+            <div class="upload-text">Click to take photo or select image</div>
+            <div class="upload-hint">Supports JPG, PNG up to 10MB</div>
+        </div>
+
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/jpg" capture="environment">
+
+        <!-- Preview Section -->
+        <div class="preview-container" id="previewContainer">
+            <img id="previewImage" class="preview-image" alt="Preview">
+            <div class="file-info">
+                <div class="file-name" id="fileName"></div>
+                <div class="file-size" id="fileSize"></div>
+            </div>
+            <button class="upload-btn" id="uploadBtn">Upload to Supabase</button>
+            <button class="cancel-btn" id="cancelBtn">Cancel</button>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Status Messages -->
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let supabase = null;
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const status = document.getElementById('status');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+
+        // Configuration inputs
+        const supabaseUrl = document.getElementById('supabaseUrl');
+        const supabaseKey = document.getElementById('supabaseKey');
+        const bucketName = document.getElementById('bucketName');
+
+        // Initialize Supabase client
+        function initSupabase() {
+            const url = supabaseUrl.value.trim();
+            const key = supabaseKey.value.trim();
+
+            if (!url || !key) {
+                showStatus('error', 'Please enter Supabase URL and Key');
+                return false;
+            }
+
+            supabase = window.supabase.createClient(url, key);
+            return true;
+        }
+
+        // Click to select file
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        // Handle file selection
+        function handleFileSelect(file) {
+            // Validate file type
+            if (!file.type.match('image/(jpeg|png|jpg)')) {
+                showStatus('error', 'Please select a JPG or PNG image');
+                return;
+            }
+
+            // Validate file size (10MB max)
+            if (file.size > 10 * 1024 * 1024) {
+                showStatus('error', 'File size must be less than 10MB');
+                return;
+            }
+
+            selectedFile = file;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                previewContainer.style.display = 'block';
+                status.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Upload to Supabase
+        uploadBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            if (!initSupabase()) return;
+
+            const bucket = bucketName.value.trim() || 'food-images';
+
+            uploadBtn.disabled = true;
+            showStatus('uploading', 'Uploading image...');
+            progressBar.style.display = 'block';
+            progressFill.style.width = '30%';
+
+            try {
+                // Generate unique filename
+                const timestamp = Date.now();
+                const fileExt = selectedFile.name.split('.').pop();
+                const filePath = `${timestamp}_${selectedFile.name}`;
+
+                // Upload to Supabase Storage
+                const { data, error } = await supabase.storage
+                    .from(bucket)
+                    .upload(filePath, selectedFile, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                progressFill.style.width = '100%';
+
+                if (error) throw error;
+
+                // Get public URL
+                const { data: urlData } = supabase.storage
+                    .from(bucket)
+                    .getPublicUrl(filePath);
+
+                showStatus('success', `✅ Upload successful!\nURL: ${urlData.publicUrl}`);
+                
+                // Reset after 3 seconds
+                setTimeout(() => {
+                    resetUpload();
+                }, 3000);
+
+            } catch (error) {
+                showStatus('error', `Upload failed: ${error.message}`);
+                uploadBtn.disabled = false;
+                progressBar.style.display = 'none';
+            }
+        });
+
+        // Cancel upload
+        cancelBtn.addEventListener('click', resetUpload);
+
+        // Reset upload state
+        function resetUpload() {
+            selectedFile = null;
+            fileInput.value = '';
+            previewContainer.style.display = 'none';
+            progressBar.style.display = 'none';
+            progressFill.style.width = '0%';
+            uploadBtn.disabled = false;
+            status.style.display = 'none';
+        }
+
+        // Show status message
+        function showStatus(type, message) {
+            status.className = `status ${type}`;
+            status.textContent = message;
+            status.style.display = 'block';
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // Load saved config from localStorage
+        window.addEventListener('load', () => {
+            supabaseUrl.value = localStorage.getItem('supabaseUrl') || '';
+            supabaseKey.value = localStorage.getItem('supabaseKey') || '';
+            bucketName.value = localStorage.getItem('bucketName') || 'food-images';
+        });
+
+        // Save config to localStorage
+        [supabaseUrl, supabaseKey, bucketName].forEach(input => {
+            input.addEventListener('change', () => {
+                localStorage.setItem(input.id, input.value);
+            });
+        });
+    </script>
+</body>
+</html>
