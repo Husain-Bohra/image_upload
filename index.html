@@ -384,7 +384,13 @@
             progressFill.style.width = '100%';
 
             const { data: urlData } = sb.storage.from(bucket).getPublicUrl(filePath);
-            await sb.from('food-table').insert({ image: urlData.publicUrl });
+            const { error: dbError } = await sb.from('food-table').insert({ 
+            image: urlData.publicUrl,
+            image_name: selectedFile.name,
+            image_url: urlData.publicUrl,
+            status: 'pending'
+});
+if (dbError) throw new Error('DB insert failed: ' + dbError.message);
             showStatus('success', `✅ Uploaded!\n${urlData.publicUrl}`);
             setTimeout(reset, 4000);
         } catch (err) {
