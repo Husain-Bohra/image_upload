@@ -7,7 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: sans-serif;
             background: #0a0a0a;
@@ -18,13 +17,10 @@
             justify-content: center;
             padding: 20px;
         }
-
         .page { display: none; width: 100%; max-width: 480px; }
         .page.active { display: block; }
-
         h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
         p.sub { color: #888; font-size: 14px; margin-bottom: 24px; }
-
         .card {
             background: #141414;
             border: 1px solid #2a2a2a;
@@ -32,7 +28,6 @@
             padding: 20px;
             margin-bottom: 16px;
         }
-
         .btn {
             width: 100%;
             padding: 16px;
@@ -46,10 +41,8 @@
         }
         .btn:active { opacity: 0.8; }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
         .btn-yellow  { background: #e8ff47; color: #000; }
         .btn-outline { background: transparent; color: #888; border: 1px solid #2a2a2a; }
-
         input {
             width: 100%;
             background: #0a0a0a;
@@ -63,18 +56,17 @@
         }
         input:focus { border-color: #e8ff47; }
         input::placeholder { color: #555; }
-
         .status {
             padding: 12px 16px;
             border-radius: 8px;
             font-size: 14px;
             margin-bottom: 16px;
             display: none;
+            line-height: 1.5;
         }
         .status.success { background: #0f2a0f; color: #5eff5e; border: 1px solid #1a4a1a; }
         .status.error   { background: #2a0f0f; color: #ff6b6b; border: 1px solid #4a1a1a; }
         .status.info    { background: #1a1a0a; color: #e8ff47; border: 1px solid #3a3a0a; }
-
         .timer-display {
             font-size: 52px;
             font-weight: 700;
@@ -83,7 +75,6 @@
             letter-spacing: 2px;
             padding: 24px 0;
         }
-
         .label {
             font-size: 12px;
             color: #888;
@@ -91,14 +82,12 @@
             letter-spacing: 1px;
             margin-bottom: 6px;
         }
-
         .stress-result { text-align: center; padding: 16px 0; }
         .stress-score  { font-size: 60px; font-weight: 700; color: #e8ff47; }
         .stress-level  { font-size: 20px; margin-top: 8px; font-weight: 600; }
         .stress-low    { color: #5eff5e; }
         .stress-medium { color: #ffcc00; }
         .stress-high   { color: #ff6b6b; }
-
         .choice-btn {
             width: 100%;
             padding: 24px 20px;
@@ -114,7 +103,6 @@
         }
         .choice-btn:active { border-color: #e8ff47; }
         .choice-btn span { display: block; font-size: 13px; color: #666; font-weight: 400; margin-top: 4px; }
-
         .back-link {
             color: #666;
             font-size: 13px;
@@ -122,7 +110,6 @@
             margin-bottom: 20px;
             display: inline-block;
         }
-
         #previewImg {
             width: 100%;
             max-height: 220px;
@@ -131,12 +118,22 @@
             margin-bottom: 12px;
             display: none;
         }
-
-        .upload-box {
-            text-align: center;
-            padding: 40px 20px;
-            cursor: pointer;
+        .upload-box { text-align: center; padding: 40px 20px; cursor: pointer; }
+        .macro-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
         }
+        .macro-box {
+            flex: 1;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+        .macro-val { font-size: 18px; font-weight: 700; color: #e8ff47; }
+        .macro-lbl { font-size: 11px; color: #666; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -145,12 +142,10 @@
 <div class="page active" id="page-landing">
     <h2>Track It</h2>
     <p class="sub">What do you want to log today?</p>
-    
     <button class="choice-btn" onclick="show('page-food')">
         🍽️ Food
-        <span>Upload a meal photo for calorie analysis</span>
+        <span>Upload a meal photo for calorie + macro analysis</span>
     </button>
-
     <button class="choice-btn" onclick="show('page-study')">
         📚 Study
         <span>Track your study session and stress level</span>
@@ -161,10 +156,8 @@
 <div class="page" id="page-food">
     <span class="back-link" onclick="show('page-landing')">← Back</span>
     <h2>Food Upload</h2>
-    <p class="sub">Select a meal photo to upload</p>
-
+    <p class="sub">Select a meal photo to analyze</p>
     <div class="status" id="food-status"></div>
-
     <div id="food-upload-zone">
         <div class="card upload-box" onclick="document.getElementById('fileInput').click()">
             <div style="font-size:40px; margin-bottom:10px;">📸</div>
@@ -173,15 +166,38 @@
         </div>
         <input type="file" id="fileInput" accept="image/jpeg,image/png,image/jpg,image/webp">
     </div>
-
     <div id="food-preview-zone" style="display:none">
         <img id="previewImg">
         <div class="card" style="padding:12px 16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
             <span id="fileName" style="font-size:13px; max-width:70%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
             <span id="fileSize" style="font-size:12px; color:#666;"></span>
         </div>
-        <button class="btn btn-yellow" id="uploadBtn" onclick="uploadFood()">Upload →</button>
+        <button class="btn btn-yellow" id="uploadBtn" onclick="uploadFood()">Analyze & Upload →</button>
         <button class="btn btn-outline" onclick="resetFood()">Cancel</button>
+    </div>
+    <!-- Result shown after analysis -->
+    <div id="food-result" style="display:none">
+        <div class="card">
+            <div class="label">Calories</div>
+            <div style="font-size:36px; font-weight:700; color:#e8ff47;" id="result-calories">0</div>
+            <div class="macro-row">
+                <div class="macro-box">
+                    <div class="macro-val" id="result-carbs">0g</div>
+                    <div class="macro-lbl">Carbs</div>
+                </div>
+                <div class="macro-box">
+                    <div class="macro-val" id="result-protein">0g</div>
+                    <div class="macro-lbl">Protein</div>
+                </div>
+                <div class="macro-box">
+                    <div class="macro-val" id="result-fat">0g</div>
+                    <div class="macro-lbl">Fat</div>
+                </div>
+            </div>
+            <div style="margin-top:14px; font-size:13px; color:#666;" id="result-items"></div>
+        </div>
+        <button class="btn btn-yellow" onclick="resetFood()">Upload Another</button>
+        <button class="btn btn-outline" onclick="show('page-landing')">Home</button>
     </div>
 </div>
 
@@ -190,10 +206,7 @@
     <span class="back-link" id="study-back" onclick="show('page-landing')">← Back</span>
     <h2>Study Session</h2>
     <p class="sub">Track your session and calculate stress</p>
-
     <div class="status" id="study-status"></div>
-
-    <!-- Step 1: Enter subject -->
     <div id="study-step1">
         <div class="card">
             <div class="label">Subject</div>
@@ -201,8 +214,6 @@
         </div>
         <button class="btn btn-yellow" onclick="startStudy()">Start Timer →</button>
     </div>
-
-    <!-- Step 2: Timer -->
     <div id="study-step2" style="display:none">
         <div class="card">
             <div class="label" style="text-align:center">
@@ -212,8 +223,6 @@
         </div>
         <button class="btn btn-yellow" onclick="stopStudy()">Stop Session</button>
     </div>
-
-    <!-- Step 3: Attendance + Marks -->
     <div id="study-step3" style="display:none">
         <div class="card">
             <div class="label">Session duration</div>
@@ -225,8 +234,6 @@
         </div>
         <button class="btn btn-yellow" onclick="calculateAndSave()">Calculate & Save →</button>
     </div>
-
-    <!-- Step 4: Result -->
     <div id="study-step4" style="display:none">
         <div class="card">
             <div class="stress-result">
@@ -241,11 +248,53 @@
 </div>
 
 <script>
-// ── FILL THESE IN ──────────────────────────────
-const SUPABASE_URL = "https://uagyonccolewfurzyrqw.supabase.co";  // https://xxxx.supabase.co
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhZ3lvbmNjb2xld2Z1cnp5cnF3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTgxODk0NiwiZXhwIjoyMDkxMzk0OTQ2fQ.0bPVam1lZpwamGUzf3IOAIIefX1pPWhuOthYhSrIMiw";  // your anon key
+// ── CONFIG ─────────────────────────────────────
+const SUPABASE_URL = "https://uagyonccolewfurzyrqw.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhZ3lvbmNjb2xld2Z1cnp5cnF3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTgxODk0NiwiZXhwIjoyMDkxMzk0OTQ2fQ.0bPVam1lZpwamGUzf3IOAIIefX1pPWhuOthYhSrIMiw";
+const GROQ_API_KEY = "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";  // paste your gsk_... key here
 const BUCKET       = "food-images";
-// ──────────────────────────────────────────────
+// ───────────────────────────────────────────────
+
+// Calorie DB (per 100g)
+const CALORIE_DB = {
+    "rice":130,"white rice":130,"brown rice":112,"jeera rice":140,"biryani":165,"pulao":150,
+    "roti":71,"chapati":71,"naan":262,"paratha":320,"puri":250,"bhatura":265,
+    "dal":116,"dal tadka":120,"dal makhani":140,"moong dal":105,"chana dal":120,"rajma":127,"chole":164,"chickpeas":164,
+    "sabzi":50,"aloo":77,"potato":77,"paneer":265,"palak paneer":120,"mixed vegetables":65,
+    "bhindi":33,"okra":33,"baingan":25,"brinjal":25,"cauliflower":25,"gobi":25,"cabbage":25,
+    "curry":120,"chicken curry":135,"chicken":165,"mutton":294,"fish curry":110,"egg curry":155,"kadhi":80,
+    "raita":60,"curd":60,"yogurt":60,"pickle":35,"achar":35,"papad":300,"chutney":45,"salad":25,
+    "samosa":252,"pakora":250,"vada":240,"idli":39,"dosa":133,"uttapam":94,
+    "gulab jamun":200,"rasgulla":186,"kheer":120,"halwa":300,"jalebi":150
+};
+
+// Macro DB (carbs, protein, fat) per 100g
+const MACRO_DB = {
+    "rice":[28,2.7,0.3],"biryani":[25,9,7],"roti":[47,3,0.4],"chapati":[47,3,0.4],
+    "dal":[20,9,0.4],"dal tadka":[18,8,4],"dal makhani":[15,8,7],
+    "paneer":[1.2,18,20],"palak paneer":[5,8,9],
+    "chicken":[0,31,4],"chicken curry":[6,18,7],"mutton":[0,25,20],
+    "chole":[27,9,3],"rajma":[22,9,0.5],"samosa":[30,4,14],
+    "aloo":[17,2,0.1],"potato":[17,2,0.1],
+    "raita":[6,3,2],"curd":[6,3,2],"yogurt":[6,3,2],
+    "paratha":[36,5,12],"naan":[48,9,3],"idli":[8,2,0.1],"dosa":[24,3,4],
+    "egg curry":[5,12,10],"sabzi":[8,2,2],"papad":[50,22,1],
+    "salad":[4,1,0.2],"chutney":[8,1,0.5],"pickle":[5,0.5,5]
+};
+
+function getCalories(food) {
+    var f = food.toLowerCase().trim();
+    if (CALORIE_DB[f]) return CALORIE_DB[f];
+    for (var k in CALORIE_DB) { if (k.includes(f) || f.includes(k)) return CALORIE_DB[k]; }
+    return 100;
+}
+
+function getMacros(food) {
+    var f = food.toLowerCase().trim();
+    if (MACRO_DB[f]) return MACRO_DB[f];
+    for (var k in MACRO_DB) { if (k.includes(f) || f.includes(k)) return MACRO_DB[k]; }
+    return [20, 5, 3]; // default
+}
 
 let sb = null;
 function getSB() {
@@ -254,12 +303,13 @@ function getSB() {
 }
 
 function show(pageId) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
     document.getElementById(pageId).classList.add('active');
 }
 
 // ── FOOD ────────────────────────────────────────
-let selectedFile = null;
+var selectedFile = null;
+var selectedFileBase64 = null;
 
 document.getElementById('fileInput').addEventListener('change', function(e) {
     var file = e.target.files[0];
@@ -271,6 +321,8 @@ document.getElementById('fileInput').addEventListener('change', function(e) {
         var img = document.getElementById('previewImg');
         img.src = ev.target.result;
         img.style.display = 'block';
+        // store base64 for Groq (strip data:image/...;base64, prefix)
+        selectedFileBase64 = ev.target.result.split(',')[1];
         document.getElementById('fileName').textContent = file.name;
         document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(1) + ' KB';
         document.getElementById('food-upload-zone').style.display = 'none';
@@ -283,35 +335,139 @@ async function uploadFood() {
     if (!selectedFile) return;
     var btn = document.getElementById('uploadBtn');
     btn.disabled = true;
-    foodStatus('info', 'Uploading...');
+
     try {
+        // Step 1: Upload to Supabase Storage
+        foodStatus('info', '📤 Uploading image...');
         var s = getSB();
         var filePath = Date.now() + '_' + selectedFile.name;
         var up = await s.storage.from(BUCKET).upload(filePath, selectedFile, { upsert: false });
         if (up.error) throw up.error;
-        var urlData = s.storage.from(BUCKET).getPublicUrl(filePath);
-        var publicUrl = urlData.data.publicUrl;
+        var publicUrl = s.storage.from(BUCKET).getPublicUrl(filePath).data.publicUrl;
+
+        // Step 2: Insert pending row
         var ins = await s.from('food-table').insert({
             image: publicUrl,
             image_name: selectedFile.name,
             image_url: publicUrl,
-            status: 'pending'
+            status: 'analyzing'
+        }).select();
+        if (ins.error) throw new Error('DB insert error: ' + ins.error.message);
+        var rowId = ins.data[0].id;
+
+        // Step 3: Call Groq API
+        foodStatus('info', '🤖 Analyzing food with AI...');
+        var items = await analyzeWithGroq(selectedFileBase64);
+
+        // Step 4: Calculate calories + macros
+        var totalCalories = 0, totalCarbs = 0, totalProtein = 0, totalFat = 0, totalGrams = 0;
+        items.forEach(function(item) {
+            var g = item.quantity_grams || 0;
+            var cal = getCalories(item.food);
+            var mac = getMacros(item.food);
+            item.calories = Math.round(cal * g / 100 * 10) / 10;
+            item.carbs    = Math.round(mac[0] * g / 100 * 10) / 10;
+            item.protein  = Math.round(mac[1] * g / 100 * 10) / 10;
+            item.fat      = Math.round(mac[2] * g / 100 * 10) / 10;
+            totalCalories += item.calories;
+            totalCarbs    += item.carbs;
+            totalProtein  += item.protein;
+            totalFat      += item.fat;
+            totalGrams    += g;
         });
-        if (ins.error) throw new Error('DB error: ' + ins.error.message);
-        foodStatus('success', '✅ Uploaded! Run the Python script to analyze.');
-        setTimeout(resetFood, 3000);
+        totalCalories = Math.round(totalCalories * 10) / 10;
+        totalCarbs    = Math.round(totalCarbs * 10) / 10;
+        totalProtein  = Math.round(totalProtein * 10) / 10;
+        totalFat      = Math.round(totalFat * 10) / 10;
+
+        // Step 5: Update food-table
+        foodStatus('info', '💾 Saving results...');
+        var upd = await s.from('food-table').update({
+            status: 'completed',
+            items: JSON.stringify(items),
+            total_grams: totalGrams,
+            total_calories: totalCalories
+        }).eq('id', rowId);
+        if (upd.error) throw new Error('DB update error: ' + upd.error.message);
+
+        // Step 6: Insert into nutrition_logs
+        var nutIns = await s.from('nutrition_logs').insert({
+            image_url: publicUrl,
+            food_items: JSON.stringify(items),
+            total_calories: totalCalories,
+            total_protein_g: totalProtein,
+            total_carbs_g: totalCarbs,
+            total_fat_g: totalFat
+        });
+        if (nutIns.error) console.warn('nutrition_logs insert warn:', nutIns.error.message);
+
+        // Step 7: Show result
+        document.getElementById('food-preview-zone').style.display = 'none';
+        document.getElementById('food-result').style.display = 'block';
+        document.getElementById('result-calories').textContent = Math.round(totalCalories) + ' kcal';
+        document.getElementById('result-carbs').textContent   = totalCarbs + 'g';
+        document.getElementById('result-protein').textContent = totalProtein + 'g';
+        document.getElementById('result-fat').textContent     = totalFat + 'g';
+        document.getElementById('result-items').textContent   = items.map(function(i) {
+            return i.food + ' (' + i.quantity_grams + 'g)';
+        }).join(', ');
+        document.getElementById('food-status').style.display = 'none';
+
     } catch(err) {
         foodStatus('error', '❌ ' + err.message);
         btn.disabled = false;
     }
 }
 
+async function analyzeWithGroq(base64Image) {
+    var prompt = 'You are a nutrition expert. Analyze this food image. Return ONLY a raw JSON array, no markdown:\n[{"food":"rice","quantity_grams":200}]\nIf no food visible return []';
+    var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + GROQ_API_KEY
+        },
+        body: JSON.stringify({
+            model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+            max_tokens: 1024,
+            temperature: 0.3,
+            messages: [{
+                role: 'user',
+                content: [
+                    { type: 'text', text: prompt },
+                    { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + base64Image } }
+                ]
+            }]
+        })
+    });
+    if (!resp.ok) throw new Error('Groq API error: ' + resp.status);
+    var data = await resp.json();
+    var raw = data.choices[0].message.content.trim();
+    // strip markdown fences if present
+    if (raw.includes('```')) {
+        var parts = raw.split('```');
+        for (var i = 0; i < parts.length; i++) {
+            var p = parts[i].trim();
+            if (p.startsWith('json')) p = p.slice(4).trim();
+            if (p.startsWith('[')) { raw = p; break; }
+        }
+    }
+    try { return JSON.parse(raw); }
+    catch(e) {
+        var s = raw.indexOf('['), end = raw.lastIndexOf(']') + 1;
+        if (s !== -1 && end > s) return JSON.parse(raw.slice(s, end));
+        return [];
+    }
+}
+
 function resetFood() {
     selectedFile = null;
+    selectedFileBase64 = null;
     document.getElementById('fileInput').value = '';
     document.getElementById('previewImg').style.display = 'none';
     document.getElementById('food-upload-zone').style.display = 'block';
     document.getElementById('food-preview-zone').style.display = 'none';
+    document.getElementById('food-result').style.display = 'none';
     document.getElementById('uploadBtn').disabled = false;
     document.getElementById('food-status').style.display = 'none';
 }
@@ -346,8 +502,7 @@ function updateTimer() {
     var h = Math.floor(elapsedSeconds / 3600);
     var m = Math.floor((elapsedSeconds % 3600) / 60);
     var s = elapsedSeconds % 60;
-    document.getElementById('timerDisplay').textContent =
-        pad(h) + ':' + pad(m) + ':' + pad(s);
+    document.getElementById('timerDisplay').textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
 }
 
 function pad(n) { return String(n).padStart(2, '0'); }
@@ -367,15 +522,11 @@ async function calculateAndSave() {
     var subject    = document.getElementById('subjectInput').value.trim();
     var duration   = elapsedSeconds / 60;
 
-    if (isNaN(attendance) || isNaN(marks)) {
-        studyStatus('error', 'Please fill in both fields'); return;
-    }
+    if (isNaN(attendance) || isNaN(marks)) { studyStatus('error', 'Please fill in both fields'); return; }
     if (attendance < 0 || attendance > 100 || marks < 0 || marks > 100) {
         studyStatus('error', 'Values must be between 0 and 100'); return;
     }
 
-    // Stress formula:
-    // study time (max 40 pts) + attendance (max 30 pts) - marks (max 30 pts) + base 30
     var stress = (duration / 120 * 40) + (attendance / 100 * 30) - (marks / 100 * 30) + 30;
     stress = Math.min(100, Math.max(0, Math.round(stress)));
 
@@ -386,12 +537,12 @@ async function calculateAndSave() {
 
     try {
         var res = await getSB().from('study_sessions').insert({
-            subject:         subject,
+            subject:          subject,
             duration_minutes: Math.round(duration * 10) / 10,
-            attendance:      attendance,
-            total_marks:     marks,
-            stress_score:    stress,
-            stress_level:    level
+            attendance:       attendance,
+            total_marks:      marks,
+            stress_score:     stress,
+            stress_level:     level
         });
         if (res.error) throw new Error(res.error.message);
     } catch(err) {
