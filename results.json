@@ -20,12 +20,12 @@
   "fullmeal.jpeg": {
     "items": [
       {
-        "food": "rice",
-        "quantity_grams": 200
+        "food": "chapati",
+        "quantity_grams": 120
       },
       {
-        "food": "roti",
-        "quantity_grams": 120
+        "food": "rice",
+        "quantity_grams": 200
       },
       {
         "food": "dal",
@@ -33,14 +33,14 @@
       },
       {
         "food": "sabzi",
-        "quantity_grams": 150
+        "quantity_grams": 100
       },
       {
         "food": "sabzi",
-        "quantity_grams": 150
+        "quantity_grams": 100
       }
     ],
-    "total_grams": 820
+    "total_grams": 720
   },
   "biryaniplate.png": {
     "items": [

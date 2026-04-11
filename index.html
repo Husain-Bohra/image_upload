@@ -505,7 +505,7 @@ async function stopStudy() {
     studyStatus('info', 'Fetching your academic data...');
 
     // Fetch from institutional_data (single user, just get first row)
-    var res = await getSB().from('institutional_data').select('marks, attendance').limit(1).single();
+    var res = await getSB().from('institutional_data').select('marks, attendance').order('created_at', { ascending: false }).limit(1).single();
     if (res.error) { studyStatus('error', '❌ Could not fetch institutional data: ' + res.error.message); return; }
 
     var marks      = res.data.marks;

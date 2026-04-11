@@ -2,6 +2,9 @@ import os
 import json
 import base64
 from groq import Groq
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configuration
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")  # Replace with your full key from the screenshot
