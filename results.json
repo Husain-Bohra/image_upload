@@ -1,0 +1,67 @@
+{
+  "cholebowl.png": {
+    "items": [
+      {
+        "food": "chickpea curry",
+        "quantity_grams": 250
+      }
+    ],
+    "total_grams": 250
+  },
+  "dal_onebowl.png": {
+    "items": [
+      {
+        "food": "dal",
+        "quantity_grams": 250
+      }
+    ],
+    "total_grams": 250
+  },
+  "fullmeal.jpeg": {
+    "items": [
+      {
+        "food": "rice",
+        "quantity_grams": 200
+      },
+      {
+        "food": "roti",
+        "quantity_grams": 120
+      },
+      {
+        "food": "dal",
+        "quantity_grams": 200
+      },
+      {
+        "food": "sabzi",
+        "quantity_grams": 150
+      },
+      {
+        "food": "sabzi",
+        "quantity_grams": 150
+      }
+    ],
+    "total_grams": 820
+  },
+  "biryaniplate.png": {
+    "items": [
+      {
+        "food": "rice",
+        "quantity_grams": 400
+      },
+      {
+        "food": "chicken",
+        "quantity_grams": 200
+      }
+    ],
+    "total_grams": 600
+  },
+  "rice_onebowl.png": {
+    "items": [
+      {
+        "food": "rice",
+        "quantity_grams": 250
+      }
+    ],
+    "total_grams": 250
+  }
+}

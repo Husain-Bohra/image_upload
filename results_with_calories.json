@@ -1,0 +1,76 @@
+{
+  "cholebowl.png": {
+    "items": [
+      {
+        "food": "chickpea curry",
+        "quantity_grams": 250,
+        "calories": 300.0
+      }
+    ],
+    "total_grams": 250,
+    "total_calories": 300.0
+  },
+  "dal_onebowl.png": {
+    "items": [],
+    "total_grams": 0,
+    "total_calories": 0
+  },
+  "fullmeal.jpeg": {
+    "items": [
+      {
+        "food": "rice",
+        "quantity_grams": 200,
+        "calories": 260.0
+      },
+      {
+        "food": "roti",
+        "quantity_grams": 120,
+        "calories": 85.2
+      },
+      {
+        "food": "dal",
+        "quantity_grams": 150,
+        "calories": 174.0
+      },
+      {
+        "food": "sabzi",
+        "quantity_grams": 100,
+        "calories": 50.0
+      },
+      {
+        "food": "sabzi",
+        "quantity_grams": 100,
+        "calories": 50.0
+      }
+    ],
+    "total_grams": 670,
+    "total_calories": 619.2
+  },
+  "biryaniplate.png": {
+    "items": [
+      {
+        "food": "rice",
+        "quantity_grams": 400,
+        "calories": 520.0
+      },
+      {
+        "food": "chicken",
+        "quantity_grams": 200,
+        "calories": 330.0
+      }
+    ],
+    "total_grams": 600,
+    "total_calories": 850.0
+  },
+  "rice_onebowl.png": {
+    "items": [
+      {
+        "food": "rice",
+        "quantity_grams": 250,
+        "calories": 325.0
+      }
+    ],
+    "total_grams": 250,
+    "total_calories": 325.0
+  }
+}
