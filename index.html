@@ -3,25 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food Plate Upload</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-   
+    <title>Track It</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <style>
-        :root {
-            --bg: #0a0a0a;
-            --surface: #141414;
-            --border: #2a2a2a;
-            --accent: #e8ff47;
-            --accent2: #ff6b35;
-            --text: #f0f0f0;
-            --muted: #666;
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family:  sans-serif;
-            background: var(--bg);
+            font-family: sans-serif;
+            background: #0a0a0a;
+            color: #f0f0f0;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -29,396 +19,417 @@
             padding: 20px;
         }
 
-        .container {
-            width: 100%;
-            max-width: 480px;
-        }
+        .page { display: none; width: 100%; max-width: 480px; }
+        .page.active { display: block; }
 
-        .header {
-            margin-bottom: 32px;
-        }
+        h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+        p.sub { color: #888; font-size: 14px; margin-bottom: 24px; }
 
-        .header h1 {
-            font-family:  sans-serif;
-            font-size: 36px;
-            font-weight: 800;
-            color: var(--text);
-            letter-spacing: -1px;
-            line-height: 1;
-        }
-
-        .header h1 span {
-            color: var(--accent);
-        }
-
-        .header p {
-            color: var(--muted);
-            margin-top: 8px;
-            font-size: 14px;
-        }
-
-        .config-block {
-            background: var(--surface);
-            border: 1px solid var(--border);
+        .card {
+            background: #141414;
+            border: 1px solid #2a2a2a;
             border-radius: 12px;
             padding: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
-        .config-label {
-            font-family: sans-serif;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: var(--accent);
-            text-transform: uppercase;
-            margin-bottom: 14px;
-        }
-
-        .config-block input {
+        .btn {
             width: 100%;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 11px 14px;
-            color: var(--text);
-            font-family:  sans-serif;
-            font-size: 13px;
-            margin-bottom: 10px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .config-block input:last-child { margin-bottom: 0; }
-
-        .config-block input:focus {
-            border-color: var(--accent);
-        }
-
-        .config-block input::placeholder { color: var(--muted); }
-
-        /* THE UPLOAD ZONE — using a label trick for reliable file picking */
-        .upload-zone {
-            position: relative;
-            border: 2px dashed var(--border);
-            border-radius: 12px;
-            padding: 48px 24px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: var(--surface);
-            margin-bottom: 20px;
-        }
-
-        .upload-zone:hover {
-            border-color: var(--accent);
-            background: #1a1a1a;
-        }
-
-        .upload-zone label {
-            position: absolute;
-            inset: 0;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        /* Hidden file input */
-        #fileInput {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            opacity: 0;
-            overflow: hidden;
-            z-index: -1;
-        }
-
-        .upload-icon {
-            font-size: 40px;
-            line-height: 1;
-        }
-
-        .upload-text {
-            font-family: sans-serif;
-            font-weight: 700;
-            color: var(--text);
-            font-size: 15px;
-        }
-
-        .upload-hint {
-            color: var(--muted);
-            font-size: 12px;
-        }
-
-        /* Preview */
-        .preview-block {
-            display: none;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .preview-block img {
-            width: 100%;
-            max-height: 260px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .preview-info {
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .preview-name {
-            font-size: 13px;
-            color: var(--text);
-            font-weight: 500;
-            max-width: 70%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .preview-size {
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        /* Buttons */
-        .btn-upload {
-            width: 100%;
-            padding: 15px;
-            background: var(--accent);
-            color: #000;
+            padding: 16px;
             border: none;
             border-radius: 10px;
-            font-family: sans-serif;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 700;
             cursor: pointer;
-            letter-spacing: 0.5px;
-            transition: all 0.2s;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            transition: opacity 0.2s;
         }
+        .btn:active { opacity: 0.8; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .btn-upload:hover { background: #d4eb2e; transform: translateY(-1px); }
-        .btn-upload:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .btn-yellow  { background: #e8ff47; color: #000; }
+        .btn-outline { background: transparent; color: #888; border: 1px solid #2a2a2a; }
 
-        .btn-cancel {
+        input {
             width: 100%;
-            padding: 13px;
-            background: transparent;
-            color: var(--muted);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            font-family: sans-serif;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: #f0f0f0;
+            font-size: 15px;
+            margin-bottom: 12px;
+            outline: none;
         }
+        input:focus { border-color: #e8ff47; }
+        input::placeholder { color: #555; }
 
-        .btn-cancel:hover { color: var(--text); border-color: #444; }
-
-        /* Progress */
-        .progress-wrap {
-            display: none;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--accent);
-            width: 0%;
-            transition: width 0.4s ease;
-            border-radius: 2px;
-        }
-
-        /* Status */
         .status {
-            display: none;
-            padding: 14px 16px;
-            border-radius: 10px;
-            font-size: 13px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
             margin-bottom: 16px;
-            line-height: 1.5;
-            word-break: break-all;
+            display: none;
         }
-
         .status.success { background: #0f2a0f; color: #5eff5e; border: 1px solid #1a4a1a; }
         .status.error   { background: #2a0f0f; color: #ff6b6b; border: 1px solid #4a1a1a; }
-        .status.loading { background: #1a1a0a; color: var(--accent); border: 1px solid #3a3a0a; }
+        .status.info    { background: #1a1a0a; color: #e8ff47; border: 1px solid #3a3a0a; }
+
+        .timer-display {
+            font-size: 52px;
+            font-weight: 700;
+            text-align: center;
+            color: #e8ff47;
+            letter-spacing: 2px;
+            padding: 24px 0;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .stress-result { text-align: center; padding: 16px 0; }
+        .stress-score  { font-size: 60px; font-weight: 700; color: #e8ff47; }
+        .stress-level  { font-size: 20px; margin-top: 8px; font-weight: 600; }
+        .stress-low    { color: #5eff5e; }
+        .stress-medium { color: #ffcc00; }
+        .stress-high   { color: #ff6b6b; }
+
+        .choice-btn {
+            width: 100%;
+            padding: 24px 20px;
+            border: 2px solid #2a2a2a;
+            border-radius: 14px;
+            background: #141414;
+            color: #f0f0f0;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 14px;
+            text-align: left;
+        }
+        .choice-btn:active { border-color: #e8ff47; }
+        .choice-btn span { display: block; font-size: 13px; color: #666; font-weight: 400; margin-top: 4px; }
+
+        .back-link {
+            color: #666;
+            font-size: 13px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        #previewImg {
+            width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .upload-box {
+            text-align: center;
+            padding: 40px 20px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1>Food<span>.</span><br>Upload</h1>
-        <p>Drop a meal photo → Supabase → Calorie pipeline</p>
-    </div>
 
-    <div class="config-block">
-        <div class="config-label">⚙ Supabase Config</div>
-        <input type="text" id="supabaseUrl" placeholder="https://xxxx.supabase.co">
-        <input type="text" id="supabaseKey" placeholder="Anon key (eyJ... or sb_publishable_...)">
-        <input type="text" id="bucketName" placeholder="Bucket name" value="food-images">
-    </div>
+<!-- LANDING -->
+<div class="page active" id="page-landing">
+    <h2>Track It</h2>
+    <p class="sub">What do you want to log today?</p>
+    
+    <button class="choice-btn" onclick="show('page-food')">
+        🍽️ Food
+        <span>Upload a meal photo for calorie analysis</span>
+    </button>
 
-    <!-- Upload zone using label trick — most reliable cross-browser -->
-    <div class="upload-zone" id="uploadZone">
-        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/jpg,image/webp">
-        <label for="fileInput">
-            <span class="upload-icon">📸</span>
-            <span class="upload-text">Click to select image</span>
-            <span class="upload-hint">JPG, PNG, WEBP — up to 10MB</span>
-        </label>
-    </div>
+    <button class="choice-btn" onclick="show('page-study')">
+        📚 Study
+        <span>Track your study session and stress level</span>
+    </button>
+</div>
 
-    <div class="preview-block" id="previewBlock">
-        <img id="previewImg" alt="Preview">
-        <div class="preview-info">
-            <span class="preview-name" id="previewName"></span>
-            <span class="preview-size" id="previewSize"></span>
+<!-- FOOD -->
+<div class="page" id="page-food">
+    <span class="back-link" onclick="show('page-landing')">← Back</span>
+    <h2>Food Upload</h2>
+    <p class="sub">Select a meal photo to upload</p>
+
+    <div class="status" id="food-status"></div>
+
+    <div id="food-upload-zone">
+        <div class="card upload-box" onclick="document.getElementById('fileInput').click()">
+            <div style="font-size:40px; margin-bottom:10px;">📸</div>
+            <div style="font-weight:700; margin-bottom:4px;">Tap to select image</div>
+            <div style="color:#666; font-size:13px;">JPG, PNG — up to 10MB</div>
         </div>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/jpg,image/webp">
     </div>
 
-    <div class="status" id="status"></div>
-    <div class="progress-wrap" id="progressWrap"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="food-preview-zone" style="display:none">
+        <img id="previewImg">
+        <div class="card" style="padding:12px 16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <span id="fileName" style="font-size:13px; max-width:70%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+            <span id="fileSize" style="font-size:12px; color:#666;"></span>
+        </div>
+        <button class="btn btn-yellow" id="uploadBtn" onclick="uploadFood()">Upload →</button>
+        <button class="btn btn-outline" onclick="resetFood()">Cancel</button>
+    </div>
+</div>
 
-    <div id="actionBtns" style="display:none">
-        <button class="btn-upload" id="uploadBtn">Upload to Supabase →</button>
-        <button class="btn-cancel" id="cancelBtn">Cancel</button>
+<!-- STUDY -->
+<div class="page" id="page-study">
+    <span class="back-link" id="study-back" onclick="show('page-landing')">← Back</span>
+    <h2>Study Session</h2>
+    <p class="sub">Track your session and calculate stress</p>
+
+    <div class="status" id="study-status"></div>
+
+    <!-- Step 1: Enter subject -->
+    <div id="study-step1">
+        <div class="card">
+            <div class="label">Subject</div>
+            <input type="text" id="subjectInput" placeholder="e.g. Mathematics">
+        </div>
+        <button class="btn btn-yellow" onclick="startStudy()">Start Timer →</button>
+    </div>
+
+    <!-- Step 2: Timer -->
+    <div id="study-step2" style="display:none">
+        <div class="card">
+            <div class="label" style="text-align:center">
+                Studying: <span id="subjectLabel" style="color:#e8ff47"></span>
+            </div>
+            <div class="timer-display" id="timerDisplay">00:00:00</div>
+        </div>
+        <button class="btn btn-yellow" onclick="stopStudy()">Stop Session</button>
+    </div>
+
+    <!-- Step 3: Attendance + Marks -->
+    <div id="study-step3" style="display:none">
+        <div class="card">
+            <div class="label">Session duration</div>
+            <div style="font-size:20px; font-weight:700; color:#e8ff47; margin-bottom:16px;" id="durationLabel"></div>
+            <div class="label">Your Attendance (%)</div>
+            <input type="number" id="attendanceInput" placeholder="e.g. 75" min="0" max="100">
+            <div class="label">Your Marks (%)</div>
+            <input type="number" id="marksInput" placeholder="e.g. 60" min="0" max="100">
+        </div>
+        <button class="btn btn-yellow" onclick="calculateAndSave()">Calculate & Save →</button>
+    </div>
+
+    <!-- Step 4: Result -->
+    <div id="study-step4" style="display:none">
+        <div class="card">
+            <div class="stress-result">
+                <div class="stress-score" id="stressScore"></div>
+                <div class="stress-level" id="stressLevelText"></div>
+                <div style="color:#666; font-size:13px; margin-top:12px;" id="stressSummary"></div>
+            </div>
+        </div>
+        <button class="btn btn-yellow" onclick="resetStudy()">New Session</button>
+        <button class="btn btn-outline" onclick="show('page-landing')">Home</button>
     </div>
 </div>
 
 <script>
-    let selectedFile = null;
+// ── FILL THESE IN ──────────────────────────────
+const SUPABASE_URL = "https://uagyonccolewfurzyrqw.supabase.co";  // https://xxxx.supabase.co
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhZ3lvbmNjb2xld2Z1cnp5cnF3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTgxODk0NiwiZXhwIjoyMDkxMzk0OTQ2fQ.0bPVam1lZpwamGUzf3IOAIIefX1pPWhuOthYhSrIMiw";  // your anon key
+const BUCKET       = "food-images";
+// ──────────────────────────────────────────────
 
-    const fileInput    = document.getElementById('fileInput');
-    const previewBlock = document.getElementById('previewBlock');
-    const previewImg   = document.getElementById('previewImg');
-    const previewName  = document.getElementById('previewName');
-    const previewSize  = document.getElementById('previewSize');
-    const uploadBtn    = document.getElementById('uploadBtn');
-    const cancelBtn    = document.getElementById('cancelBtn');
-    const actionBtns   = document.getElementById('actionBtns');
-    const statusEl     = document.getElementById('status');
-    const progressWrap = document.getElementById('progressWrap');
-    const progressFill = document.getElementById('progressFill');
-    const uploadZone   = document.getElementById('uploadZone');
+let sb = null;
+function getSB() {
+    if (!sb) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    return sb;
+}
 
-    // Load saved config
-    window.addEventListener('load', () => {
-        document.getElementById('supabaseUrl').value  = localStorage.getItem('sbUrl')  || '';
-        document.getElementById('supabaseKey').value  = localStorage.getItem('sbKey')  || '';
-        document.getElementById('bucketName').value   = localStorage.getItem('sbBucket') || 'food-images';
-    });
+function show(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+}
 
-    ['supabaseUrl','supabaseKey','bucketName'].forEach(id => {
-        document.getElementById(id).addEventListener('input', e => {
-            const map = { supabaseUrl:'sbUrl', supabaseKey:'sbKey', bucketName:'sbBucket' };
-            localStorage.setItem(map[id], e.target.value);
-        });
-    });
+// ── FOOD ────────────────────────────────────────
+let selectedFile = null;
 
-    // Drag and drop
-    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.style.borderColor = 'var(--accent)'; });
-    uploadZone.addEventListener('dragleave', ()  => { uploadZone.style.borderColor = ''; });
-    uploadZone.addEventListener('drop', e => {
-        e.preventDefault();
-        uploadZone.style.borderColor = '';
-        if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-    });
-
-    fileInput.addEventListener('change', e => {
-        if (e.target.files[0]) handleFile(e.target.files[0]);
-    });
-
-    function handleFile(file) {
-        if (file.size > 10 * 1024 * 1024) { showStatus('error', 'File too large — max 10MB'); return; }
-        selectedFile = file;
-        const reader = new FileReader();
-        reader.onload = e => {
-            previewImg.src = e.target.result;
-            previewName.textContent = file.name;
-            previewSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
-            previewBlock.style.display = 'block';
-            actionBtns.style.display = 'block';
-            uploadZone.style.display = 'none';
-            statusEl.style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-    }
-
-    uploadBtn.addEventListener('click', async () => {
-        const url    = document.getElementById('supabaseUrl').value.trim();
-        const key    = document.getElementById('supabaseKey').value.trim();
-        const bucket = document.getElementById('bucketName').value.trim() || 'food-images';
-
-        if (!url || !key) { showStatus('error', 'Fill in Supabase URL and Key first'); return; }
-        if (!selectedFile) return;
-
-        uploadBtn.disabled = true;
-        showStatus('loading', 'Uploading...');
-        progressWrap.style.display = 'block';
-        progressFill.style.width = '40%';
-
-        try {
-            const sb = window.supabase.createClient(url, key);
-            const filePath = `${Date.now()}_${selectedFile.name}`;
-
-            const { error } = await sb.storage.from(bucket).upload(filePath, selectedFile, { upsert: false });
-            if (error) throw error;
-
-            progressFill.style.width = '100%';
-
-            const { data: urlData } = sb.storage.from(bucket).getPublicUrl(filePath);
-            const { error: dbError } = await sb.from('food-table').insert({ 
-            image: urlData.publicUrl,
-            image_name: selectedFile.name,
-            image_url: urlData.publicUrl,
-            status: 'pending'
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { foodStatus('error', 'File too large — max 10MB'); return; }
+    selectedFile = file;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+        var img = document.getElementById('previewImg');
+        img.src = ev.target.result;
+        img.style.display = 'block';
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(1) + ' KB';
+        document.getElementById('food-upload-zone').style.display = 'none';
+        document.getElementById('food-preview-zone').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
 });
-if (dbError) throw new Error('DB insert failed: ' + dbError.message);
-            showStatus('success', `✅ Uploaded!\n${urlData.publicUrl}`);
-            setTimeout(reset, 4000);
-        } catch (err) {
-            showStatus('error', `❌ ${err.message}`);
-            uploadBtn.disabled = false;
-            progressFill.style.width = '0%';
-        }
-    });
 
-    cancelBtn.addEventListener('click', reset);
+async function uploadFood() {
+    if (!selectedFile) return;
+    var btn = document.getElementById('uploadBtn');
+    btn.disabled = true;
+    foodStatus('info', 'Uploading...');
+    try {
+        var s = getSB();
+        var filePath = Date.now() + '_' + selectedFile.name;
+        var up = await s.storage.from(BUCKET).upload(filePath, selectedFile, { upsert: false });
+        if (up.error) throw up.error;
+        var urlData = s.storage.from(BUCKET).getPublicUrl(filePath);
+        var publicUrl = urlData.data.publicUrl;
+        var ins = await s.from('food-table').insert({
+            image: publicUrl,
+            image_name: selectedFile.name,
+            image_url: publicUrl,
+            status: 'pending'
+        });
+        if (ins.error) throw new Error('DB error: ' + ins.error.message);
+        foodStatus('success', '✅ Uploaded! Run the Python script to analyze.');
+        setTimeout(resetFood, 3000);
+    } catch(err) {
+        foodStatus('error', '❌ ' + err.message);
+        btn.disabled = false;
+    }
+}
 
-    function reset() {
-        selectedFile = null;
-        fileInput.value = '';
-        previewBlock.style.display = 'none';
-        actionBtns.style.display = 'none';
-        uploadZone.style.display = 'block';
-        progressWrap.style.display = 'none';
-        progressFill.style.width = '0%';
-        uploadBtn.disabled = false;
-        statusEl.style.display = 'none';
+function resetFood() {
+    selectedFile = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('previewImg').style.display = 'none';
+    document.getElementById('food-upload-zone').style.display = 'block';
+    document.getElementById('food-preview-zone').style.display = 'none';
+    document.getElementById('uploadBtn').disabled = false;
+    document.getElementById('food-status').style.display = 'none';
+}
+
+function foodStatus(type, msg) {
+    var el = document.getElementById('food-status');
+    el.className = 'status ' + type;
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+// ── STUDY ───────────────────────────────────────
+var timerInterval = null;
+var startTime = null;
+var elapsedSeconds = 0;
+
+function startStudy() {
+    var subject = document.getElementById('subjectInput').value.trim();
+    if (!subject) { studyStatus('error', 'Please enter a subject'); return; }
+    document.getElementById('subjectLabel').textContent = subject;
+    document.getElementById('study-step1').style.display = 'none';
+    document.getElementById('study-step2').style.display = 'block';
+    document.getElementById('study-status').style.display = 'none';
+    document.getElementById('study-back').style.display = 'none';
+    startTime = Date.now();
+    elapsedSeconds = 0;
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+    elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+    var h = Math.floor(elapsedSeconds / 3600);
+    var m = Math.floor((elapsedSeconds % 3600) / 60);
+    var s = elapsedSeconds % 60;
+    document.getElementById('timerDisplay').textContent =
+        pad(h) + ':' + pad(m) + ':' + pad(s);
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function stopStudy() {
+    clearInterval(timerInterval);
+    var mins = Math.floor(elapsedSeconds / 60);
+    var secs = elapsedSeconds % 60;
+    document.getElementById('durationLabel').textContent = mins + 'm ' + secs + 's';
+    document.getElementById('study-step2').style.display = 'none';
+    document.getElementById('study-step3').style.display = 'block';
+}
+
+async function calculateAndSave() {
+    var attendance = parseFloat(document.getElementById('attendanceInput').value);
+    var marks      = parseFloat(document.getElementById('marksInput').value);
+    var subject    = document.getElementById('subjectInput').value.trim();
+    var duration   = elapsedSeconds / 60;
+
+    if (isNaN(attendance) || isNaN(marks)) {
+        studyStatus('error', 'Please fill in both fields'); return;
+    }
+    if (attendance < 0 || attendance > 100 || marks < 0 || marks > 100) {
+        studyStatus('error', 'Values must be between 0 and 100'); return;
     }
 
-    function showStatus(type, msg) {
-        statusEl.className = `status ${type}`;
-        statusEl.textContent = msg;
-        statusEl.style.display = 'block';
+    // Stress formula:
+    // study time (max 40 pts) + attendance (max 30 pts) - marks (max 30 pts) + base 30
+    var stress = (duration / 120 * 40) + (attendance / 100 * 30) - (marks / 100 * 30) + 30;
+    stress = Math.min(100, Math.max(0, Math.round(stress)));
+
+    var level, levelClass;
+    if      (stress <= 33) { level = 'Low';      levelClass = 'stress-low'; }
+    else if (stress <= 66) { level = 'Moderate'; levelClass = 'stress-medium'; }
+    else                   { level = 'High';     levelClass = 'stress-high'; }
+
+    try {
+        var res = await getSB().from('study_sessions').insert({
+            subject:         subject,
+            duration_minutes: Math.round(duration * 10) / 10,
+            attendance:      attendance,
+            total_marks:     marks,
+            stress_score:    stress,
+            stress_level:    level
+        });
+        if (res.error) throw new Error(res.error.message);
+    } catch(err) {
+        studyStatus('error', '❌ Save failed: ' + err.message); return;
     }
+
+    document.getElementById('study-step3').style.display = 'none';
+    document.getElementById('study-step4').style.display = 'block';
+    document.getElementById('stressScore').textContent = stress + '/100';
+    var lvlEl = document.getElementById('stressLevelText');
+    lvlEl.textContent = level + ' Stress';
+    lvlEl.className = 'stress-level ' + levelClass;
+    document.getElementById('stressSummary').textContent =
+        subject + ' · ' + Math.floor(duration) + 'm studied · ' +
+        attendance + '% attendance · ' + marks + '% marks';
+}
+
+function resetStudy() {
+    clearInterval(timerInterval);
+    elapsedSeconds = 0;
+    document.getElementById('subjectInput').value = '';
+    document.getElementById('attendanceInput').value = '';
+    document.getElementById('marksInput').value = '';
+    document.getElementById('timerDisplay').textContent = '00:00:00';
+    document.getElementById('study-step1').style.display = 'block';
+    document.getElementById('study-step2').style.display = 'none';
+    document.getElementById('study-step3').style.display = 'none';
+    document.getElementById('study-step4').style.display = 'none';
+    document.getElementById('study-status').style.display = 'none';
+    document.getElementById('study-back').style.display = 'inline-block';
+}
+
+function studyStatus(type, msg) {
+    var el = document.getElementById('study-status');
+    el.className = 'status ' + type;
+    el.textContent = msg;
+    el.style.display = 'block';
+}
 </script>
 </body>
 </html>
