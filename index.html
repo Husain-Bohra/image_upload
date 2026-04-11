@@ -392,10 +392,10 @@ async function uploadFood() {
 
         // Step 6: Insert into nutrition_logs
         var nutIns = await s.from('nutrition_logs').insert({
-            student_id: '00000000-0000-0000-0000-000000000000',
+            
             meal_type: 'A',
             image_url: publicUrl,
-            food_items: JSON.stringify(items),
+            food_items: items,
             total_calories: totalCalories,
             total_protein_g: totalProtein,
             total_carbs_g: totalCarbs,
