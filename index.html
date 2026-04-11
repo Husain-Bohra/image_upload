@@ -223,17 +223,7 @@
         </div>
         <button class="btn btn-yellow" onclick="stopStudy()">Stop Session</button>
     </div>
-    <div id="study-step3" style="display:none">
-        <div class="card">
-            <div class="label">Session duration</div>
-            <div style="font-size:20px; font-weight:700; color:#e8ff47; margin-bottom:16px;" id="durationLabel"></div>
-            <div class="label">Your Attendance (%)</div>
-            <input type="number" id="attendanceInput" placeholder="e.g. 75" min="0" max="100">
-            <div class="label">Your Marks (%)</div>
-            <input type="number" id="marksInput" placeholder="e.g. 60" min="0" max="100">
-        </div>
-        <button class="btn btn-yellow" onclick="calculateAndSave()">Calculate & Save →</button>
-    </div>
+    
     <div id="study-step4" style="display:none">
         <div class="card">
             <div class="stress-result">
@@ -509,25 +499,19 @@ function updateTimer() {
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
-function stopStudy() {
+async function stopStudy() {
     clearInterval(timerInterval);
-    var mins = Math.floor(elapsedSeconds / 60);
-    var secs = elapsedSeconds % 60;
-    document.getElementById('durationLabel').textContent = mins + 'm ' + secs + 's';
     document.getElementById('study-step2').style.display = 'none';
-    document.getElementById('study-step3').style.display = 'block';
-}
+    studyStatus('info', 'Fetching your academic data...');
 
-async function calculateAndSave() {
-    var attendance = parseFloat(document.getElementById('attendanceInput').value);
-    var marks      = parseFloat(document.getElementById('marksInput').value);
-    var subject    = document.getElementById('subjectInput').value.trim();
+    // Fetch from institutional_data (single user, just get first row)
+    var res = await getSB().from('institutional_data').select('marks, attendance').limit(1).single();
+    if (res.error) { studyStatus('error', '❌ Could not fetch institutional data: ' + res.error.message); return; }
+
+    var marks      = res.data.marks;
+    var attendance = res.data.attendance;
     var duration   = elapsedSeconds / 60;
-
-    if (isNaN(attendance) || isNaN(marks)) { studyStatus('error', 'Please fill in both fields'); return; }
-    if (attendance < 0 || attendance > 100 || marks < 0 || marks > 100) {
-        studyStatus('error', 'Values must be between 0 and 100'); return;
-    }
+    var subject    = document.getElementById('subjectInput').value.trim();
 
     var stress = (duration / 120 * 40) + (attendance / 100 * 30) - (marks / 100 * 30) + 30;
     stress = Math.min(100, Math.max(0, Math.round(stress)));
@@ -537,41 +521,35 @@ async function calculateAndSave() {
     else if (stress <= 66) { level = 'Moderate'; levelClass = 'stress-medium'; }
     else                   { level = 'High';     levelClass = 'stress-high'; }
 
-    try {
-        var res = await getSB().from('study_sessions').insert({
-            subject:          subject,
-            duration_minutes: Math.round(duration * 10) / 10,
-            attendance:       attendance,
-            total_marks:      marks,
-            stress_score:     stress,
-            stress_level:     level
-        });
-        if (res.error) throw new Error(res.error.message);
-    } catch(err) {
-        studyStatus('error', '❌ Save failed: ' + err.message); return;
-    }
+    studyStatus('info', 'Saving...');
+    var ins = await getSB().from('study_sessions').insert({
+        subject:          subject,
+        duration_minutes: Math.round(duration * 10) / 10,
+        attendance:       attendance,
+        total_marks:      marks,
+        stress_score:     stress,
+        stress_level:     level
+    });
+    if (ins.error) { studyStatus('error', '❌ Save failed: ' + ins.error.message); return; }
 
-    document.getElementById('study-step3').style.display = 'none';
+    document.getElementById('study-status').style.display = 'none';
     document.getElementById('study-step4').style.display = 'block';
     document.getElementById('stressScore').textContent = stress + '/100';
     var lvlEl = document.getElementById('stressLevelText');
     lvlEl.textContent = level + ' Stress';
     lvlEl.className = 'stress-level ' + levelClass;
     document.getElementById('stressSummary').textContent =
-        subject + ' · ' + Math.floor(duration) + 'm studied · ' +
-        attendance + '% attendance · ' + marks + '% marks';
+        subject + ' · ' + Math.floor(duration) + 'm · ' + attendance + '% attendance · ' + marks + '% marks';
 }
+
 
 function resetStudy() {
     clearInterval(timerInterval);
     elapsedSeconds = 0;
     document.getElementById('subjectInput').value = '';
-    document.getElementById('attendanceInput').value = '';
-    document.getElementById('marksInput').value = '';
     document.getElementById('timerDisplay').textContent = '00:00:00';
     document.getElementById('study-step1').style.display = 'block';
     document.getElementById('study-step2').style.display = 'none';
-    document.getElementById('study-step3').style.display = 'none';
     document.getElementById('study-step4').style.display = 'none';
     document.getElementById('study-status').style.display = 'none';
     document.getElementById('study-back').style.display = 'inline-block';
